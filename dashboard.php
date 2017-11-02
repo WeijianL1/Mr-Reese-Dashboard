@@ -3,10 +3,10 @@
   // $sort = array_key_exists('sort', $_GET) ? $_GET['sort'] : null;
     $questions = $db->query('SELECT DISTINCT id,question_content FROM qna ORDER BY id DESC ')->fetchAll(PDO::FETCH_ASSOC);
     $failed_questions = $db->query('SELECT DISTINCT id,question_content FROM qna WHERE success=0 ORDER BY id DESC ')->fetchAll(PDO::FETCH_ASSOC);
-    $success_questions = $db->query('SELECT DISTINCT id,question_content FROM qna WHERE success=1 ORDER BY id DESC ')->fetchAll(PDO::FETCH_ASSOC);
+    $success_questions = $db->query('SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC ')->fetchAll(PDO::FETCH_ASSOC);
     $userNum= $db->query('SELECT * FROM qna GROUP BY user_id')->fetchAll(PDO::FETCH_ASSOC);
-    $topQs=$db->query('SELECT COUNT(*) as x,question_content FROM qna GROUP BY answer_id ORDER BY x DESC')->fetchAll(PDO::FETCH_ASSOC);
-  
+    $topQs=$db->query('SELECT COUNT(*) as x,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id GROUP BY answer_id ORDER BY x DESC')->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!doctype html>
@@ -19,11 +19,11 @@
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
     <!-- Bootstrap core CSS     -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
     <!--  Material Dashboard CSS    -->
-    <link href="assets/css/material-dashboard.css?v=1.2.0" rel="stylesheet" />
+    <link href="../assets/css/material-dashboard.css?v=1.2.0" rel="stylesheet" />
     <!--  CSS for Demo Purpose, don't include it in your project     -->
-    <link href="assets/css/demo.css" rel="stylesheet" />
+    <link href="../assets/css/demo.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300|Material+Icons' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
 
 <body>
     <div class="wrapper">
-        <div class="sidebar" data-color="carolina" data-image="assets/img/sidebar-1.jpg">
+        <div class="sidebar" data-color="carolina" data-image="../assets/img/sidebar-unc.jpg">
             <!--
         Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
 
@@ -39,7 +39,7 @@
     -->
             <div class="logo">
                 <a href="http://mrreese.web.unc.edu" class="simple-text">
-                    <img src="assets/img/logo.png" alt="" width="220px"/>
+                    <img src="../assets/img/logo.png" alt="" width="220px"/>
                 </a>
             </div>
             <div class="sidebar-wrapper">
@@ -184,22 +184,38 @@
                             <div class="card card-nav-tabs">
                               <div class="card-header" data-background-color="purple">
                                   <h4 class="title">Most Asked Questions</h4>
-                                  <p class="category">Some text here</p>
+                                  <p class="category">Click on the questions to show answers</p>
                               </div>
                                 <div class="card-content">
                                     <div class="tab-content">
                                       <table class="table table-hover">
                                           <thead class="text-primary">
-                                              <th>Times of being Asked</th>
-                                              <th>Content</th>
+                                              <th width="15%">Times being Asked</th>
+                                              <th width="85%">Content</th>
                                           </thead>
                                           <tbody>
-                                            <?php foreach($topQs as $q) : ?>
+                                            <div id="Accordion" data-children=".item">
+                                            <?php foreach($topQs as $key=>$q) : ?>
                                             <tr>
                                               <td><a><?= $q['x']; ?></a></td>
-                                              <td><a><?= $q['question_content']; ?></a></td>
+                                              <td>
+                                                <div class="item">
+                                                  <a data-toggle="collapse" data-parent="#Accordion" href="#<?= $key; ?>" aria-expanded="true" aria-controls="<?= $q['id']; ?>">
+                                                    <?= $q['question_content']; ?>
+                                                  </a>
+                                                  <div id="<?= $key; ?>" class="collapse" role="tabpanel">
+                                                    <p class="mb-3">
+                                                      <br>
+                                                      <?= $q['answer_content']; ?>
+                                                    </p>
+                                                  </div>
+                                                </div>
+
+                                              </td>
                                             </tr>
+
                                             <?php endforeach; ?>
+                                            </div>
                                           </tbody>
                                       </table>
                                     </div>
@@ -209,30 +225,36 @@
                         <div class="col-lg-12 col-md-12">
                             <div class="card">
                                 <div class="card-header" data-background-color="orange">
-                                    <h4 class="title">Latest Questions</h4>
-                                    <p class="category">Not yet posted</p>
+                                    <h4 class="title">Latest Successful Questions</h4>
+                                    <p class="category">Click on the questions to show answers</p>
                                 </div>
                                 <div class="card-content table-responsive">
                                     <table class="table table-hover">
                                         <thead class="text-warning">
-                                            <th>Question Id</th>
-                                            <th>Question</th>
+                                            <th width="20%">Question Id</th>
+                                            <th width="80%">Question</th>
                                         </thead>
                                         <tbody>
-                                          <?php foreach($questions as $q) : ?>
+                                          <?php foreach($success_questions as $key=>$q) : ?>
                                           <tr>
                                             <td><a><?= $q['id']; ?></a></td>
-                                            <td><a><?= $q['question_content']; ?></a></td>
+                                            <td>
+
+                                              <div class="item">
+                                                <a data-toggle="collapse" data-parent="#Accordion" href="#q<?= $key; ?>" aria-expanded="true" aria-controls="<?= $q['id']; ?>">
+                                                  <?= $q['question_content']; ?>
+                                                </a>
+                                                <div id="q<?= $key; ?>" class="collapse" role="tabpanel">
+                                                  <p class="mb-3">
+                                                    <br>
+                                                    <?= $q['answer_content']; ?>
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            </td>
                                           </tr>
                                           <?php endforeach; ?>
-                                            <!-- <tr>
-                                                <td>1</td>
-                                                <td>Where can I buy a dolphin watch?</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>Where can I watch a dolphin show?</td>
-                                            </tr> -->
+
                                         </tbody>
                                     </table>
                                 </div>
@@ -251,7 +273,7 @@
                                             <th>Question</th>
                                         </thead>
                                         <tbody>
-                                          <?php foreach($failed_questions as $q) : ?>
+                                          <?php foreach($failed_questions as $key=>$q) : ?>
                                           <tr>
                                             <td><a><?= $q['id']; ?></a></td>
                                             <td><a><?= $q['question_content']; ?></a></td>
@@ -302,23 +324,23 @@
     </div>
 </body>
 <!--   Core JS Files   -->
-<script src="assets/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="assets/js/material.min.js" type="text/javascript"></script>
+<script src="../assets/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+<script src="../assets/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../assets/js/material.min.js" type="text/javascript"></script>
 <!--  Charts Plugin -->
 <!-- <script src="assets/js/chartist.min.js"></script> -->
 <!--  Dynamic Elements plugin -->
-<script src="assets/js/arrive.min.js"></script>
+<script src="../assets/js/arrive.min.js"></script>
 <!--  PerfectScrollbar Library -->
-<script src="assets/js/perfect-scrollbar.jquery.min.js"></script>
+<script src="../assets/js/perfect-scrollbar.jquery.min.js"></script>
 <!--  Notifications Plugin    -->
-<script src="assets/js/bootstrap-notify.js"></script>
+<script src="../assets/js/bootstrap-notify.js"></script>
 <!--  Google Maps Plugin    -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
 <!-- Material Dashboard javascript methods -->
-<script src="assets/js/material-dashboard.js?v=1.2.0"></script>
+<script src="../assets/js/material-dashboard.js?v=1.2.0"></script>
 <!-- Material Dashboard DEMO methods, don't include it in your project! -->
-<script src="assets/js/demo.js"></script>
+<script src="../assets/js/demo.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
 
