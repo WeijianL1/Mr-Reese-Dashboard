@@ -11,40 +11,38 @@ if(isset($_POST["page"])){
 }
 //get current starting point of records
 $position = (($page_number-1) * $item_per_page);
-// ChromePhp::log($position);
-// ChromePhp::log($item_per_page);
-$results = $db->prepare("SELECT COUNT(*) as x,question_content,answer_content,Q.id  FROM qna Q join answers A on Q.answer_id=A.id GROUP BY answer_id ORDER BY x DESC LIMIT $position,$item_per_page");
+$results = $db->prepare("SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC LIMIT $position,$item_per_page");
 $results->execute();
 //getting results from database
 ?>
 
 
   <table class="table table-hover">
-      <thead class="text-primary">
-          <th width="15%">Times being Asked</th>
-          <th width="85%">Content</th>
+      <thead class="text-warning">
+          <th width="20%">Question Id</th>
+          <th width="80%">Question</th>
       </thead>
       <tbody>
-        <div id="Accordion" data-children=".item">
+        <div id="Accordion1" data-children=".item1">
 <?php
 while($row = $results->fetch(PDO::FETCH_ASSOC))
 {
  ?>
  <tr>
-   <td><a><?= $row['x']; ?></a></td>
+   <td><a><?= $row['id']; ?></a></td>
    <td>
-     <div class="item">
-       <a data-toggle="collapse" data-parent="#Accordion" href="#<?= $row['id']; ?>" aria-expanded="true" aria-controls="<?= $q['id']; ?>">
+
+     <div class="item1">
+       <a data-toggle="collapse" data-parent="#Accordion1" href="#latest<?= $row['id']; ?>" aria-expanded="true" aria-controls="<?= $row['id']; ?>">
          <?= $row['question_content']; ?>
        </a>
-       <div id="<?= $row['id']; ?>" class="collapse" role="tabpanel">
+       <div id="latest<?= $row['id']; ?>" class="collapse" role="tabpanel">
          <p class="mb-3">
            <br>
            <?= $row['answer_content']; ?>
          </p>
        </div>
      </div>
-
    </td>
  </tr>
 

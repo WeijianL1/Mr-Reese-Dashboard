@@ -67,3 +67,16 @@
 .failed{
   color: black !important;
 }
+
+.paging_link{
+  display: flex;
+  justify-content: center;
+}
+
+.paging_link_failed>.pagination>.active>a{
+  background-color: #4caf50;
+}
+
+.paging_link_latest>.pagination>.active>a{
+  background-color: #ff9800; 
+}

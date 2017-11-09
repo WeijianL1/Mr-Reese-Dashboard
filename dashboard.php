@@ -3,21 +3,20 @@
   include 'ChromePhp.php';
 
   ChromePhp::log('Hello console!');
-  // $sort = array_key_exists('sort', $_GET) ? $_GET['sort'] : null;
     $questions = $db->query('SELECT DISTINCT id,question_content FROM qna ORDER BY id DESC ')->fetchAll(PDO::FETCH_ASSOC);
-    $failed_questions = $db->query('SELECT DISTINCT id,question_content FROM qna WHERE success=0 ORDER BY id DESC LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
-    $success_questions = $db->query('SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
+    $failed_questions = $db->query('SELECT DISTINCT id,question_content FROM qna WHERE success=0 ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC);
+    $success_questions = $db->query('SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC')->fetchAll(PDO::FETCH_ASSOC);
     $userNum= $db->query('SELECT * FROM qna GROUP BY user_id')->fetchAll(PDO::FETCH_ASSOC);
-    $topQs=$db->query('SELECT COUNT(*) as x,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id GROUP BY answer_id ORDER BY x DESC LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
+    $topQs=$db->query('SELECT COUNT(*) as x,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id GROUP BY answer_id ORDER BY x DESC')->fetchAll(PDO::FETCH_ASSOC);
     $item_per_page = 10;
 
-    $results = $db->prepare("SELECT COUNT(*) FROM qna Q join answers A on Q.answer_id=A.id");
-    $results->execute();
-    $get_total_rows = $results->fetch();
-    //breaking total records into pages
-    $pages = ceil($get_total_rows[0]/$item_per_page);
+    $pages = ceil(count($topQs)/$item_per_page);
+    $pages_sucess = ceil(count($success_questions)/$item_per_page);
+    $pages_failed = ceil(count($failed_questions)/$item_per_page);
 
-      ChromePhp::log($get_total_rows);
+    ChromePhp::log(count($topQs));
+    ChromePhp::log(count($success_questions));
+    ChromePhp::log(count($failed_questions));
 
 ?>
 
@@ -67,12 +66,12 @@
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="./user.html">
                             <i class="material-icons">note_add</i>
                             <p>Raise a Question</p>
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>
@@ -89,23 +88,6 @@
                         <a class="navbar-brand" href="#"> Mr.Reese Dashboard </a>
                     </div>
                     <div class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav navbar-right">
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="material-icons">notifications</i>
-                                    <span class="notification">5</span>
-                                    <p class="hidden-lg hidden-md">Notifications</p>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#">Mike John responded to your email</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">You have 5 new tasks</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
                         <form class="navbar-form navbar-right" role="search">
                             <div class="form-group  is-empty">
                                 <input type="text" class="form-control" placeholder="Search">
@@ -174,22 +156,6 @@
                               </div>
                           </div>
                       </div>
-                      <!-- <div class="col-lg-3 col-md-6 col-sm-6">
-                          <div class="card card-stats">
-                              <div class="card-header" data-background-color="blue">
-                                  <i class="fa fa-twitter"></i>
-                              </div>
-                              <div class="card-content">
-                                  <p class="category">Followers</p>
-                                  <h3 class="title">+245</h3>
-                              </div>
-                              <div class="card-footer">
-                                  <div class="stats">
-                                      <i class="material-icons">update</i> Just Updated
-                                  </div>
-                              </div>
-                          </div>
-                      </div> -->
                   </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12">
@@ -198,41 +164,15 @@
                               <a data-toggle="collapse"  href="#card_most_asked" aria-expanded="true">
                                 <div class="card-header" data-background-color="purple">
                                     <h4 class="title">Most Asked Questions</h4>
-                                    <p class="category">Click on the questions to show answers</p>
+                                    <p class="category">Click to expand / Click on the questions to show answers</p>
                                 </div>
                               </a>
                                 <div class="card-content collapse" role="tabpanel" id="card_most_asked">
                                     <div class="tab-content">
-                                      <table class="table table-hover">
-                                          <thead class="text-primary">
-                                              <th width="15%">Times being Asked</th>
-                                              <th width="85%">Content</th>
-                                          </thead>
-                                          <tbody>
-                                            <div id="Accordion" data-children=".item">
-                                            <?php foreach($topQs as $key=>$q) : ?>
-                                            <tr>
-                                              <td><a><?= $q['x']; ?></a></td>
-                                              <td>
-                                                <div class="item">
-                                                  <a data-toggle="collapse" data-parent="#Accordion" href="#<?= $key; ?>" aria-expanded="true" aria-controls="<?= $q['id']; ?>">
-                                                    <?= $q['question_content']; ?>
-                                                  </a>
-                                                  <div id="<?= $key; ?>" class="collapse" role="tabpanel">
-                                                    <p class="mb-3">
-                                                      <br>
-                                                      <?= $q['answer_content']; ?>
-                                                    </p>
-                                                  </div>
-                                                </div>
 
-                                              </td>
-                                            </tr>
+                                      <div id="results_most"></div>
+                                      <div class="paging_link_most paging_link"></div>
 
-                                            <?php endforeach; ?>
-                                            </div>
-                                          </tbody>
-                                      </table>
                                     </div>
                                 </div>
                             </div>
@@ -244,38 +184,14 @@
                               <a data-toggle="collapse"  href="#card_latest" aria-expanded="true">
                                 <div class="card-header" data-background-color="orange">
                                     <h4 class="title">Latest Successful Questions</h4>
-                                    <p class="category">Click on the questions to show answers</p>
+                                    <p class="category">Click to expand / Click on the questions to show answers</p>
                                 </div>
                               </a>
                                 <div class="card-content table-responsive collapse" role="tabpanel" id="card_latest">
-                                    <table class="table table-hover">
-                                        <thead class="text-warning">
-                                            <th width="20%">Question Id</th>
-                                            <th width="80%">Question</th>
-                                        </thead>
-                                        <tbody>
-                                          <?php foreach($success_questions as $key=>$q) : ?>
-                                          <tr>
-                                            <td><a><?= $q['id']; ?></a></td>
-                                            <td>
 
-                                              <div class="item">
-                                                <a data-toggle="collapse" data-parent="#Accordion" href="#q<?= $key; ?>" aria-expanded="true" aria-controls="<?= $q['id']; ?>">
-                                                  <?= $q['question_content']; ?>
-                                                </a>
-                                                <div id="q<?= $key; ?>" class="collapse" role="tabpanel">
-                                                  <p class="mb-3">
-                                                    <br>
-                                                    <?= $q['answer_content']; ?>
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </td>
-                                          </tr>
-                                          <?php endforeach; ?>
+                                  <div id="results_latest"></div>
+                                  <div class="paging_link_latest paging_link"></div>
 
-                                        </tbody>
-                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -284,50 +200,20 @@
                               <a data-toggle="collapse"  href="#card_failed" aria-expanded="true">
                                 <div class="card-header" data-background-color="green">
                                     <h4 class="title">Failed Questions</h4>
-                                    <p class="category">Not yet posted</p>
+                                    <p class="category">Click to expand</p>
                                 </div>
                               </a>
                                 <div class="card-content table-responsive collapse" id="card_failed" role="tabpanel">
-                                    <table class="table table-hover">
-                                        <thead class="text-success">
-                                            <th>Question Id</th>
-                                            <th>Question</th>
-                                        </thead>
-                                        <tbody>
-                                          <?php foreach($failed_questions as $key=>$q) : ?>
-                                          <tr>
-                                            <td><a class="failed"><?= $q['id']; ?></a></td>
-                                            <td><a class="failed"><?= $q['question_content']; ?></a></td>
-                                          </tr>
-                                          <?php endforeach; ?>
-                                            <!-- <tr>
-                                                <td>1</td>
-                                                <td>Where can I buy a dolphin watch?</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>Where can I watch a dolphin show?</td>
-                                            </tr> -->
-                                        </tbody>
-                                    </table>
+
+                                  <div id="results_failed"></div>
+                                  <div class="paging_link_failed paging_link"></div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-
-                <div class="bs-docs-example">
-                    <p class="demo demo4_top"></p>
-                    <p class="well demo content4">
-                        Dynamic content here.
-                    </p>
-                </div>
-
-
-                <!-- <div id="results"></div>
-                <br />
-                <div class="paging_link"></div> -->
             </div>
             <footer class="footer">
                 <div class="container-fluid">
@@ -360,34 +246,34 @@
 
     <script>
     $(document).ready(function() {
-     $("#results").load("get_records.php"); //initial page number to load
-     $(".paging_link").bootpag({
+     $("#results_most").load("get_records.php"); //initial page number to load
+     $(".paging_link_most").bootpag({
      total: <?php echo $pages; ?>
      }).on("page", function(e, num){
      e.preventDefault();
-     $("#results").prepend('<div class="loading-indication">Loading...</div>');
-     $("#results").load("get_records.php", {'page':num});
+     $("#results_most").load("get_records.php", {'page':num});
      });
     });
 
-    $('.demo4_top').bootpag({
-        total: 50,
-        page: 2,
-        maxVisible: 5,
-        leaps: true,
-        firstLastUse: true,
-        first: '<span aria-hidden="true">&larr;</span>',
-        last: '<span aria-hidden="true">&rarr;</span>',
-        wrapClass: 'pagination',
-        activeClass: 'active',
-        disabledClass: 'disabled',
-        nextClass: 'next',
-        prevClass: 'prev',
-        lastClass: 'last',
-        firstClass: 'first'
-    }).on("page", function(event, num){
-        $(".content4").html("Page " + num);
-    }).find('.pagination');
+    $(document).ready(function() {
+     $("#results_failed").load("get_records_failed.php"); //initial page number to load
+     $(".paging_link_failed").bootpag({
+     total: <?php echo $pages_failed; ?>
+     }).on("page", function(e, num){
+     e.preventDefault();
+     $("#results_failed").load("get_records_failed.php", {'page':num});
+     });
+    });
+
+    $(document).ready(function() {
+     $("#results_latest").load("get_records_latest.php"); //initial page number to load
+     $(".paging_link_latest").bootpag({
+     total: <?php echo $pages_sucess; ?>
+     }).on("page", function(e, num){
+     e.preventDefault();
+     $("#results_latest").load("get_records_latest.php", {'page':num});
+     });
+    });
     </script>
 </body>
 <!--   Core JS Files   -->
