@@ -32,7 +32,9 @@
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="../assets/js/jquery.bootpag.js" type="text/javascript" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud-1.0.4.js" charset="utf-8"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud.css" media="screen" title="no title">
     <!-- Bootstrap core CSS     -->
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
     <!--  Material Dashboard CSS    -->
@@ -130,7 +132,7 @@
                                   <i class="material-icons">check_circle</i>
                               </div>
                               <div class="card-content">
-                                  <p class="category">Question Successfully Answered</p>
+                                  <p class="category">Question Answered</p>
                                   <h3 class="title"><?= count($success_questions); ?></h3>
                               </div>
                               <div class="card-footer">
@@ -211,6 +213,12 @@
                                 </div>
                             </div>
                         </div>
+
+
+                        <div class="col-lg-12 col-md-12">
+                            <div id="demo" style="width: 850px; height: 550px;"></div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -274,6 +282,25 @@
      $("#results_latest").load("get_records_latest.php", {'page':num});
      });
     });
+
+
+    var words = [
+      {text: "Lorem", weight: 11},
+      {text: "Ipsum", weight: 10.5},
+      {text: "Dolor", weight: 9.4},
+      {text: "Sit", weight: 8},
+      {text: "Amet", weight: 6.2},
+      {text: "Consectetur", weight: 6},
+      {text: "Adipiscing", weight: 5},
+      {text: "Hello World", weight: 8},
+      {text: "Weijian", weight: 9},
+      {text: "Zhenwei", weight: 7},
+      {text: "Zhengyang", weight: 7},
+      {text: "Yichen", weight: 12}
+      /* ... */
+    ];
+
+    $('#demo').jQCloud(words);
     </script>
 </body>
 <!--   Core JS Files   -->
