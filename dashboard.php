@@ -47,7 +47,6 @@
                $key="text: ".$key;
                $value="weight:".$value;
                $keywordsJSON[$key]=$value;
-
                $xx[$i]=json_encode($keywordsJSON);
                $i++;
 
@@ -58,7 +57,7 @@
               $xx = str_replace('"', '', json_encode($xx));
               $xx = str_replace('text: ', 'text: "', json_encode($xx));
 
-              // echo json_encode($xx);
+    // echo json_encode($xx);
     //
     // foreach ($keywordsArray as $key => $value) {
     //   $key="text: ".$key;
@@ -412,6 +411,9 @@
     wordsJson = wordsJson.replace(/\\/g, "");
     wordsJson = wordsJson.replace(/,weight/g, "\", weight");
     wordsJson = wordsJson.substring(1, wordsJson.length - 1);
+    // wordsJson = wordsJson.replace(/weight/g, "\"weight\"");
+    // wordsJson = wordsJson.replace(/text/g, "\"text\"");
+    // wordsJson= JSON.parse(wordsJson);
     // console.log(wordsJson);
     var wordsJson = eval(wordsJson);
     console.log(wordsJson);
