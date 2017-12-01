@@ -11,7 +11,7 @@ if(isset($_POST["page"])){
 }
 //get current starting point of records
 $position = (($page_number-1) * $item_per_page);
-$results = $db->prepare("SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC LIMIT $position,$item_per_page");
+$results = $db->prepare("SELECT DISTINCT Q.id,question_content,answer_content,confidence,source FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC LIMIT $position,$item_per_page");
 $results->execute();
 //getting results from database
 ?>
@@ -20,7 +20,9 @@ $results->execute();
   <table class="table table-hover">
       <thead class="text-warning">
           <th width="20%">Question Id</th>
-          <th width="80%">Question</th>
+          <th width="50%">Question</th>
+          <th width="15%">Confidence</th>
+          <th width="15%">Source</th>
       </thead>
       <tbody>
         <div id="Accordion1" data-children=".item1">
@@ -29,7 +31,7 @@ while($row = $results->fetch(PDO::FETCH_ASSOC))
 {
  ?>
  <tr>
-   <td><a><?= $row['id']; ?></a></td>
+   <td><p><?= $row['id']; ?></p></td>
    <td>
 
      <div class="item1">
@@ -43,6 +45,21 @@ while($row = $results->fetch(PDO::FETCH_ASSOC))
          </p>
        </div>
      </div>
+   </td>
+   <td>
+     <p class="mb-3">
+       <br>
+       <?= $row['confidence']; ?>
+       <?php if($row['confidence']) : ?>
+           %
+       <?php endif; ?>
+     </p>
+   </td>
+   <td>
+     <p class="mb-3">
+       <br>
+       <?= $row['source']; ?>
+     </p>
    </td>
  </tr>
 

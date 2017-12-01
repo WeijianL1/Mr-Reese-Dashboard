@@ -5,7 +5,7 @@
   ChromePhp::log('Hello console!');
     $questions = $db->query('SELECT DISTINCT id,question_content FROM qna ORDER BY id DESC ')->fetchAll(PDO::FETCH_ASSOC);
     $failed_questions = $db->query('SELECT DISTINCT id,question_content FROM qna WHERE success=0 ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC);
-    $success_questions = $db->query('SELECT DISTINCT Q.id,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC')->fetchAll(PDO::FETCH_ASSOC);
+    $success_questions = $db->query('SELECT DISTINCT Q.id,question_content,answer_content,confidence,source,keywords FROM qna Q join answers A on Q.answer_id=A.id WHERE success=1 ORDER BY Q.id DESC')->fetchAll(PDO::FETCH_ASSOC);
     $userNum= $db->query('SELECT * FROM qna GROUP BY user_id')->fetchAll(PDO::FETCH_ASSOC);
     $topQs=$db->query('SELECT COUNT(*) as x,question_content,answer_content FROM qna Q join answers A on Q.answer_id=A.id GROUP BY answer_id ORDER BY x DESC')->fetchAll(PDO::FETCH_ASSOC);
     $item_per_page = 10;
@@ -17,6 +17,63 @@
     ChromePhp::log(count($topQs));
     ChromePhp::log(count($success_questions));
     ChromePhp::log(count($failed_questions));
+
+    $keywords=$db->query('SELECT keywords FROM qna ORDER BY id DESC LIMIT 50')->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+    // $bodytag = str_replace('%" :%', '" ,', json_encode($keywordsJSON));
+    //  echo json_encode($xx);
+
+    $keywordsArray=Array();
+    $a = array();
+    foreach ($keywords as $row) {
+      $splitRow = explode(',', $row["keywords"]);
+      foreach ($splitRow as $item)
+          {
+              // Trim to get rid of any leading/trailing spaces
+              $arrayKey = trim($item);
+              if (!array_key_exists($arrayKey, $keywordsArray)&&$arrayKey!=""){
+                  $keywordsArray[$arrayKey] =  1;}
+              else if($arrayKey!=""){
+                  $keywordsArray[$arrayKey]++;
+                }
+          }
+         }
+
+         $xx=Array();
+               $i=0;
+             foreach ($keywordsArray as $key => $value) {
+               $key="text: ".$key;
+               $value="weight:".$value;
+               $keywordsJSON[$key]=$value;
+
+               $xx[$i]=json_encode($keywordsJSON);
+               $i++;
+
+               $keywordsJSON=Array();
+             }
+
+              $xx = str_replace('":', '",', json_encode($xx));
+              $xx = str_replace('"', '', json_encode($xx));
+              $xx = str_replace('text: ', 'text: "', json_encode($xx));
+
+              // echo json_encode($xx);
+    //
+    // foreach ($keywordsArray as $key => $value) {
+    //   $key="text: ".$key;
+    //   $value="weight:".$value;
+    //   $keywordsJSON[$key]=$value;
+    //   // ChromePhp::log($keywordsJSON[$key]);
+    // }
+    //
+    // echo json_encode($keywordsJSON);
+    // $json = json_encode($keywordsJSON);
+
+
+    // ChromePhp::log($keywordsArray);
+    // ChromePhp::log($keywordsArray[0]);
+    // ChromePhp::log($keywordsArray[1]);
 
 ?>
 
@@ -160,6 +217,25 @@
                       </div>
                   </div>
                     <div class="row">
+
+                      <div class="col-lg-12 col-md-12">
+                          <div class="card">
+                            <a data-toggle="collapse"  href="#card_latest" aria-expanded="true">
+                              <div class="card-header" data-background-color="orange">
+                                  <h4 class="title">Latest Successful Questions</h4>
+                                  <p class="category">Click to expand / Click on the questions to show answers</p>
+                              </div>
+                            </a>
+                              <div class="card-content table-responsive collapse" role="tabpanel" id="card_latest">
+
+                                <div id="results_latest"></div>
+                                <div class="paging_link_latest paging_link"></div>
+
+                              </div>
+
+                          </div>
+                      </div>
+
                         <div class="col-lg-12 col-md-12">
                             <div class="card card-nav-tabs">
 
@@ -180,23 +256,6 @@
                             </div>
                         </div>
 
-
-                        <div class="col-lg-12 col-md-12">
-                            <div class="card">
-                              <a data-toggle="collapse"  href="#card_latest" aria-expanded="true">
-                                <div class="card-header" data-background-color="orange">
-                                    <h4 class="title">Latest Successful Questions</h4>
-                                    <p class="category">Click to expand / Click on the questions to show answers</p>
-                                </div>
-                              </a>
-                                <div class="card-content table-responsive collapse" role="tabpanel" id="card_latest">
-
-                                  <div id="results_latest"></div>
-                                  <div class="paging_link_latest paging_link"></div>
-
-                                </div>
-                            </div>
-                        </div>
                         <div class="col-lg-12 col-md-12">
                             <div class="card">
                               <a data-toggle="collapse"  href="#card_failed" aria-expanded="true">
@@ -214,11 +273,75 @@
                             </div>
                         </div>
 
+                        <!-- <div class="col-lg-12 col-md-12">
+                          <div class="card">
+                            <a data-toggle="collapse"  href="#tag_cloud" aria-expanded="true">
+                              <div class="card-header" data-background-color="red">
+                                  <h4 class="title">Tag Cloud Visualization</h4>
+                                  <p class="category">Click to expand</p>
+                              </div>
+                            </a>
+                              <div class="card-content table-responsive collapse" id="tag_cloud" role="tabpanel">
 
-                        <div class="col-lg-12 col-md-12">
-                            <div id="demo" style="width: 850px; height: 550px;"></div>
-                        </div>
+                                <div id="demo" style="width: 950px; height: 550px;"></div>
+                              </div>
+                          </div>
 
+                        </div> -->
+
+                        <!-- <div id="demo" style="width: 850px; height: 550px;"></div> -->
+
+                    </div>
+
+
+
+
+                    <div class="row">
+                      <div class="col-lg-6 col-md-12">
+                        <div class="card">
+                            <div class="card-header" data-background-color="red">
+                                <h4 class="title">Tag Cloud Visualization</h4>
+                                <p class="category">Click to expand</p>
+                            </div>
+                            <div class="card-content table-responsive">
+                              <div id="demo" style="width: 500px; height: 350px;"></div>
+                            </div>
+                              </div>
+
+                      </div>
+                      <div class="col-lg-6 col-md-12">
+                          <div class="card">
+                              <div class="card-header" data-background-color="orange">
+                                  <h4 class="title">Sources</h4>
+                                  <p class="category">News Sources</p>
+                              </div>
+                              <div class="card-content table-responsive">
+                                  <table class="table table-hover">
+                                      <thead class="text-warning">
+                                          <th>Number</th>
+                                          <th>Name</th>
+                                      </thead>
+                                      <tbody>
+                                          <tr>
+                                              <td>1</td>
+                                              <td>Star News</td>
+
+                                          </tr>
+                                          <tr>
+                                              <td>2</td>
+                                              <td>Spreadsheet</td>
+
+                                          </tr>
+                                          <tr>
+                                              <td>3</td>
+                                              <td>Google</td>
+
+                                          </tr>
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
                     </div>
                 </div>
 
@@ -284,6 +407,15 @@
     });
 
 
+    var wordsJson = <?php echo json_encode($xx) ?>;
+    // console.log(wordsJson);
+    wordsJson = wordsJson.replace(/\\/g, "");
+    wordsJson = wordsJson.replace(/,weight/g, "\", weight");
+    wordsJson = wordsJson.substring(1, wordsJson.length - 1);
+    // console.log(wordsJson);
+    var wordsJson = eval(wordsJson);
+    console.log(wordsJson);
+
     var words = [
       {text: "Lorem", weight: 11},
       {text: "Ipsum", weight: 10.5},
@@ -296,11 +428,12 @@
       {text: "Weijian", weight: 9},
       {text: "Zhenwei", weight: 7},
       {text: "Zhengyang", weight: 7},
-      {text: "Yichen", weight: 12}
+      {text: "Weijian", weight: 9}
       /* ... */
     ];
+    console.log(words);
 
-    $('#demo').jQCloud(words);
+    $('#demo').jQCloud(wordsJson);
     </script>
 </body>
 <!--   Core JS Files   -->
