@@ -296,23 +296,22 @@
 
 
                     <div class="row">
-                      <div class="col-lg-6 col-md-12">
+                      <div class="col-lg-8 col-md-12">
                         <div class="card">
-                            <div class="card-header" data-background-color="red">
+                            <div class="card-header" data-background-color="carolina">
                                 <h4 class="title">Tag Cloud Visualization</h4>
-                                <p class="category">Click to expand</p>
+
                             </div>
                             <div class="card-content table-responsive">
-                              <div id="demo" style="width: 500px; height: 350px;"></div>
+                              <div id="demo" style="width: 600px; height: 350px;"></div>
                             </div>
                               </div>
 
                       </div>
-                      <div class="col-lg-6 col-md-12">
+                      <div class="col-lg-4 col-md-12">
                           <div class="card">
                               <div class="card-header" data-background-color="orange">
-                                  <h4 class="title">Sources</h4>
-                                  <p class="category">News Sources</p>
+                                  <h4 class="title">News Sources</h4>
                               </div>
                               <div class="card-content table-responsive">
                                   <table class="table table-hover">
